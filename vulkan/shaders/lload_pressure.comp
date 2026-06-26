@@ -1,0 +1,19 @@
+#version 450
+#extension GL_EXT_control_flow_attributes : require
+
+layout(local_size_x = 32) in;
+
+shared float sm[4096];
+
+layout(std430, binding = 0) buffer Out { float out_data[]; };
+
+void main() {
+    uint tid = gl_LocalInvocationID.x;
+    float r[64];
+    [[unroll]] for (uint i = 0u; i < 64u; i++) {
+        r[i] = sm[(i * 3u + tid) & 4095u];
+    }
+    [[unroll]] for (uint i = 0u; i < 64u; i++) {
+        out_data[tid * 64u + i] = r[i];
+    }
+}
